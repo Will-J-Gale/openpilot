@@ -36,8 +36,6 @@ def get_can_signals(CP, gearbox_msg, main_on_sig_msg):
     ("USER_BRAKE", "VSA_STATUS"),
     ("BRAKE_HOLD_ACTIVE", "VSA_STATUS"),
     ("STEER_STATUS", "STEER_STATUS"),
-    ("GEAR_SHIFTER", gearbox_msg),
-    ("GEAR", gearbox_msg),
     ("PEDAL_GAS", "POWERTRAIN_DATA"),
     ("CRUISE_SETTING", "SCM_BUTTONS"),
     ("ACC_STATUS", "POWERTRAIN_DATA"),
@@ -67,11 +65,6 @@ def get_can_signals(CP, gearbox_msg, main_on_sig_msg):
       ("SCM_FEEDBACK", 10),
       ("SCM_BUTTONS", 25),
     ]
-
-  if CP.carFingerprint in (CAR.CRV_HYBRID, CAR.CIVIC_BOSCH_DIESEL, CAR.ACURA_RDX_3G, CAR.HONDA_E):
-    checks.append((gearbox_msg, 50))
-  else:
-    checks.append((gearbox_msg, 100))
 
   if CP.carFingerprint in HONDA_BOSCH_ALT_BRAKE_SIGNAL:
     signals.append(("BRAKE_PRESSED", "BRAKE_MODULE"))
@@ -236,8 +229,7 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint in (HONDA_BOSCH | {CAR.CIVIC, CAR.ODYSSEY, CAR.ODYSSEY_CHN}):
       ret.parkingBrake = cp.vl["EPB_STATUS"]["EPB_STATE"] != 0
 
-    gear = int(cp.vl[self.gearbox_msg]["GEAR_SHIFTER"])
-    ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(gear, None))
+    ret.gearShifter = self.parse_gear_shifter("D")
 
     if self.CP.enableGasInterceptor:
       # Same threshold as panda, equivalent to 1e-5 with previous DBC scaling
