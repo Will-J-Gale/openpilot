@@ -155,7 +155,8 @@ def panda_state_function(vs: VehicleState, exit_event: threading.Event):
       'ignitionLine': vs.ignition,
       'pandaType': "blackPanda",
       'controlsAllowed': True,
-      'safetyModel': 'hondaNidec'
+      'safetyModel': 'hondaBosch',
+      'safetyParam': 2
     }
     pm.send('pandaStates', dat)
     time.sleep(0.5)
