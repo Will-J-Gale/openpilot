@@ -87,3 +87,6 @@ build/
 
 poetry.toml
 Pipfile
+
+#Ajarpilot ignore
+ajarpilot/selector/selector

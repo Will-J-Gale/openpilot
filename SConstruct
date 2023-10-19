@@ -186,6 +186,7 @@ env = Environment(
 
   CPPPATH=cpppath + [
     "#",
+    "#ajarpilot/selector/include",
     "#third_party/acados/include",
     "#third_party/acados/include/blasfeo/include",
     "#third_party/acados/include/hpipm/include",
@@ -424,6 +425,7 @@ SConscript(['selfdrive/locationd/SConscript'])
 SConscript(['selfdrive/navd/SConscript'])
 SConscript(['selfdrive/modeld/SConscript'])
 SConscript(['selfdrive/ui/SConscript'])
+SConscript(['ajarpilot/selector/SConscript'])
 
 if arch in ['x86_64', 'aarch64', 'Darwin'] and Dir('#tools/cabana/').exists() and GetOption('extras'):
   SConscript(['tools/replay/SConscript'])
