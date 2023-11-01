@@ -1,7 +1,9 @@
+#include <cstdlib>
 #include <iostream>
 #include <string>
 
 #include <MainWindow.h>
+#include <Constants.h>
 
 MainWindow::MainWindow(QWidget* parent) : QWidget(parent)
 {
@@ -44,7 +46,7 @@ MainWindow::MainWindow(QWidget* parent) : QWidget(parent)
             color: white;
             background: black;
             border: 2px solid red;
-            font-size: 25pt;
+            font-size: 100pt;
             font-weight: bold;
         }
     )");
@@ -57,13 +59,14 @@ MainWindow::MainWindow(QWidget* parent) : QWidget(parent)
 
 void MainWindow::runAjarpilot()
 {
-    std::cout << "Ajarpilot" << std::endl;
+    // std::system(AJARPILOT_LAUNCH);
+    std::cout << AJARPILOT_LAUNCH;
     QCoreApplication::quit();
 }
 
 void MainWindow::runOpenpilot()
 {
-    std::cout << "Openpilot" << std::endl;
+    std::system(OPENPILOT_LAUNCH);
     QCoreApplication::quit();
 }
 
@@ -76,4 +79,6 @@ void MainWindow::decrementTimer()
 
     std::string openpilot_text = "openpilot\n(" + std::to_string(timeRemaining) + ")";
     openpilotButton->setText(QString::fromUtf8(openpilot_text.c_str()));
+
+    update();
 }

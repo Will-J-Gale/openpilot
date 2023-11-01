@@ -10,17 +10,29 @@
 #include <QPlatformSurfaceEvent>
 #endif
 
+#include "system/hardware/hw.h"
+
+const QSize DEVICE_SCREEN_SIZE = {2160, 1080};
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     const QSize size = QGuiApplication::primaryScreen()->size();
     MainWindow w;
-    w.resize(size.width() / 2.0f, size.height() / 2.0f);
+
+    if (Hardware::PC()) {
+        w.setMinimumSize(QSize(640, 480)); // allow resize smaller than fullscreen
+        w.setMaximumSize(DEVICE_SCREEN_SIZE);
+        w.resize(size);
+    }
+    else 
+        w.setFixedSize(DEVICE_SCREEN_SIZE);
+
     w.show();
 
 #ifdef QCOM2
     QPlatformNativeInterface *native = QGuiApplication::platformNativeInterface();
-    wl_surface *s = reinterpret_cast<wl_surface*>(auto native_surface = native->nativeResourceForWindow("surface", w.windowHandle()));
+    wl_surface *s = reinterpret_cast<wl_surface*>(native->nativeResourceForWindow("surface", w.windowHandle()));
     wl_surface_set_buffer_transform(s, WL_OUTPUT_TRANSFORM_270);
     wl_surface_commit(s);
     w.showFullScreen();
