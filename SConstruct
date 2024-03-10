@@ -398,7 +398,9 @@ SConscript([
   'system/proclogd/SConscript',
   'system/ubloxd/SConscript',
   'system/loggerd/SConscript',
+  'ajarpilot/vision_ipc_test/SConscript'
 ])
+# SConscript(['ajarpilot/vision_ipc_test/SConscript'])
 if arch != "Darwin":
   SConscript([
     'system/camerad/SConscript',
