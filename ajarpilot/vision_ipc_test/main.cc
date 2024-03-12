@@ -18,7 +18,8 @@ int main()
 {
     std::cout << "Trying to connect" << std::endl;
     VisionIpcClient client = VisionIpcClient("camerad", VISION_STREAM_DRIVER, false);
-    std::unique_ptr<Encoder> encoder;
+    std::unique_ptr<Encoder> encoder = nullptr;
+
     const EncoderInfo encoder_info = {
         .publish_name = "wideRoadEncodeData",
         .filename = "test.hevc",
@@ -39,7 +40,12 @@ int main()
 
         if(buf != nullptr)
         {
-            encoder.reset(new Encoder(encoder_info, buf->width, buf->height));
+            if(encoder == nullptr)
+            {
+
+                encoder.reset(new Encoder(encoder_info, buf->width, buf->height));
+                encoder->encoder_open(nullptr);
+            }
             encoder->encode_frame(buf, &extra);
             std::cout << "Recevied image" << std::endl;
         }
