@@ -29,9 +29,10 @@ with SMBus(I2C_BUS) as bus:
     while(True):
         try:
             accel_data = bus.read_i2c_block_data(LSM6DS3_ADDR, ACCEL_DATA_ADDR, 6)
-            x = decode_bytes(accel_data[0], accel_data[1])
-            y = decode_bytes(accel_data[2], accel_data[3])
-            z = decode_bytes(accel_data[4], accel_data[5])
+            scale = 9.81 * 2.0 / 32768
+            x = decode_bytes(accel_data[0], accel_data[1]) * scale
+            y = decode_bytes(accel_data[2], accel_data[3]) * scale
+            z = decode_bytes(accel_data[4], accel_data[5]) * scale
 
             print(x, y, z)
 
