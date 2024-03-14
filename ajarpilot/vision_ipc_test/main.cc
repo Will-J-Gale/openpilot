@@ -5,6 +5,7 @@
 
 #include <cereal/visionipc/visionipc_client.h>
 #include <system/loggerd/logger.h>
+#include <system/loggerd/video_writer.h>
 
 #ifdef QCOM2
 #include "system/loggerd/encoder/v4l_encoder.h"
