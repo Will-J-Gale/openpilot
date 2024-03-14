@@ -50,7 +50,7 @@ with SMBus(I2C_BUS) as bus:
         try:
 
             accel_x, accel_y, accel_z = read_accel(bus)
-            gyro_x, gyro_y, gyro_z = read_accel(bus)
+            gyro_x, gyro_y, gyro_z = read_gyro(bus)
 
             #print(f"{accel_x:.2f} {accel_y:.2f} {accel_z:.2f}")
             print(f"{gyro_x:.2f} {gyro_y:.2f} {gyro_z:.2f}")
