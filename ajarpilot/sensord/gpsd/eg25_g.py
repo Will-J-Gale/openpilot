@@ -287,16 +287,16 @@ class GPS:
         # connect to modem
         self.diag = ModemDiag()
         r = setup_quectel(self.diag)
-        want_assistance = not r
-        current_gps_time = utc_to_gpst(GPSTime.from_datetime(datetime.utcnow()))
+        self.want_assistance = not r
+        self.current_gps_time = utc_to_gpst(GPSTime.from_datetime(datetime.utcnow()))
         cloudlog.warning("quectel setup done")
         gpio_init(GPIO.GNSS_PWR_EN, True)
         gpio_set(GPIO.GNSS_PWR_EN, True)
 
     def read(self):
-        if os.path.exists(ASSIST_DATA_FILE) and want_assistance:
+        if os.path.exists(ASSIST_DATA_FILE) and self.want_assistance:
             setup_quectel(self.diag)
-            want_assistance = False
+            self.want_assistance = False
 
         opcode, payload = self.diag.recv()
         if opcode != DIAG_LOG_F:
@@ -360,7 +360,7 @@ class GPS:
                     else:
                         setattr(sv, k, v)
             if report.source == log.QcomGnss.MeasurementSource.gps:
-                current_gps_time = GPSTime(report.gpsWeek, report.gpsMilliseconds / 1000.0)
+                self.current_gps_time = GPSTime(report.gpsWeek, report.gpsMilliseconds / 1000.0)
 
         elif log_type == LOG_GNSS_POSITION_REPORT:
             report = self.unpack_position(log_payload)
@@ -387,7 +387,7 @@ class GPS:
             # quectel gps verticalAccuracy is clipped to 500, set invalid if so
             gps.flags = 1 if gps.verticalAccuracy != 500 else 0
             if gps.flags:
-                want_assistance = False
+                self.want_assistance = False
                 self.stop_download_event.set()
 
         elif log_type == LOG_GNSS_OEMDRE_SVPOLY_REPORT:
@@ -407,14 +407,14 @@ class GPS:
                     setattr(poly, k, v)
             prn = get_prn_from_nmea_id(poly.svId)
             if prn[0] == 'R':
-                epoch = GPSTime(current_gps_time.week, (poly.t0 - 3*SECS_IN_HR + SECS_IN_DAY) % (SECS_IN_WEEK) + get_leap_seconds(current_gps_time))
+                epoch = GPSTime(self.current_gps_time.week, (poly.t0 - 3*SECS_IN_HR + SECS_IN_DAY) % (SECS_IN_WEEK) + get_leap_seconds(self.current_gps_time))
             else:
-                epoch = GPSTime(current_gps_time.week, poly.t0)
+                epoch = GPSTime(self.current_gps_time.week, poly.t0)
 
             # handle week rollover
-            if epoch.tow < SECS_IN_DAY and current_gps_time.tow > 6*SECS_IN_DAY:
+            if epoch.tow < SECS_IN_DAY and self.current_gps_time.tow > 6*SECS_IN_DAY:
                 epoch.week += 1
-            elif epoch.tow > 6*SECS_IN_DAY and current_gps_time.tow < SECS_IN_DAY:
+            elif epoch.tow > 6*SECS_IN_DAY and self.current_gps_time.tow < SECS_IN_DAY:
                 epoch.week -= 1
 
             poly.gpsWeek = epoch.week
