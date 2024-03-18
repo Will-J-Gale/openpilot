@@ -453,26 +453,26 @@ class GPS:
                 else:
                     setattr(report, k, v)
             report.init('sv', dat['svCount'])
-        if dat['svCount'] > 0:
-            assert len(sats)//dat['svCount'] == size_meas_sv
-            for i in range(dat['svCount']):
-                sv = report.sv[i]
-                sv.init('measurementStatus')
-                sat = unpack_meas_sv(sats[size_meas_sv*i:size_meas_sv*(i+1)])
-                for k,v in sat.items():
-                    if k == "parityErrorCount":
-                        sv.gpsParityErrorCount = v
-                    elif k == "frequencyIndex":
-                        sv.glonassFrequencyIndex = v
-                    elif k == "hemmingErrorCount":
-                        sv.glonassHemmingErrorCount = v
-                    elif k == "measurementStatus":
-                        for kk,vv in itertools.chain(*measurement_status_fields):
-                            setattr(sv.measurementStatus, kk, bool(v & (1<<vv)))
-                    elif k == "miscStatus":
-                        for kk,vv in miscStatusFields.items():
-                            setattr(sv.measurementStatus, kk, bool(v & (1<<vv)))
-                    elif k == "pad":
-                        pass
-                    else:
-                        setattr(sv, k, v)
+            if dat['svCount'] > 0:
+                assert len(sats)//dat['svCount'] == size_meas_sv
+                for i in range(dat['svCount']):
+                    sv = report.sv[i]
+                    sv.init('measurementStatus')
+                    sat = unpack_meas_sv(sats[size_meas_sv*i:size_meas_sv*(i+1)])
+                    for k,v in sat.items():
+                        if k == "parityErrorCount":
+                            sv.gpsParityErrorCount = v
+                        elif k == "frequencyIndex":
+                            sv.glonassFrequencyIndex = v
+                        elif k == "hemmingErrorCount":
+                            sv.glonassHemmingErrorCount = v
+                        elif k == "measurementStatus":
+                            for kk,vv in itertools.chain(*measurement_status_fields):
+                                setattr(sv.measurementStatus, kk, bool(v & (1<<vv)))
+                        elif k == "miscStatus":
+                            for kk,vv in miscStatusFields.items():
+                                setattr(sv.measurementStatus, kk, bool(v & (1<<vv)))
+                        elif k == "pad":
+                            pass
+                        else:
+                            setattr(sv, k, v)
