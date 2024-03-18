@@ -266,8 +266,8 @@ class GPS:
 
         wait_for_modem()
 
-        stop_download_event = Event()
-        assist_fetch_proc = Process(target=downloader_loop, args=(stop_download_event,))
+        self.stop_download_event = Event()
+        assist_fetch_proc = Process(target=downloader_loop, args=(self.stop_download_event,))
         assist_fetch_proc.start()
         def cleanup(sig, frame):
             cloudlog.warning("caught sig disabling quectel gps")
@@ -276,7 +276,7 @@ class GPS:
             teardown_quectel(self.diag)
             cloudlog.warning("quectel cleanup done")
 
-            stop_download_event.set()
+            self.stop_download_event.set()
             assist_fetch_proc.kill()
             assist_fetch_proc.join()
 
