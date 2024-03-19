@@ -25,11 +25,17 @@ def decode_bytes(lowByte, highByte):
         value = value - (256*256)
     return value
 
+def decode_20bit(b2, b1, b0):
+    combined = (b0 << 16) | (b1 << 8) | b2
+    return combined / (1 << 4)
+
 def read_mag_data(bus:SMBus):
-    mag_data = bus.read_i2c_block_data(MMC5603NJ_I2C_ADDR, MMC5603NJ_DATA_REG, 6)
-    x = decode_bytes(mag_data[0], mag_data[1])
-    y = decode_bytes(mag_data[2], mag_data[3])
-    z = decode_bytes(mag_data[4], mag_data[5])
+    mag_data = bus.read_i2c_block_data(MMC5603NJ_I2C_ADDR, MMC5603NJ_DATA_REG, 0)
+    scale = 1 / 16384 
+    x = (decode_20bit(mag_data[6], mag_data[1], mag_data[0]) * scale) - 32
+    y = (decode_20bit(mag_data[7], mag_data[3], mag_data[2]) * scale) - 32
+    z = (decode_20bit(mag_data[8], mag_data[5], mag_data[4]) * scale) - 32
+
     return x, y, z
 
 
