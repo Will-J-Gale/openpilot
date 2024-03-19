@@ -30,7 +30,7 @@ def decode_20bit(b2, b1, b0):
     return combined / (1 << 4)
 
 def read_mag_data(bus:SMBus):
-    mag_data = bus.read_i2c_block_data(MMC5603NJ_I2C_ADDR, MMC5603NJ_DATA_REG, 0)
+    mag_data = bus.read_i2c_block_data(MMC5603NJ_I2C_ADDR, MMC5603NJ_DATA_REG, 9)
     scale = 1 / 16384 
     x = (decode_20bit(mag_data[6], mag_data[1], mag_data[0]) * scale) - 32
     y = (decode_20bit(mag_data[7], mag_data[3], mag_data[2]) * scale) - 32
@@ -64,7 +64,7 @@ def main():
 
                 reset_x, reset_y, reset_z = read_mag_data(bus)
 
-                print(f"SET: {x} - {y} - {z} RESET: {reset_x} - {reset_y} - {reset_z}")
+                print(f"SET: {x:.3f} - {y:.3f} - {z:.3f} RESET: {reset_x:.3f} - {reset_y:.3f} - {reset_z:.3f}")
 
             except KeyboardInterrupt:
                 break
