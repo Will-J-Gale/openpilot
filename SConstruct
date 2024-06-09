@@ -427,7 +427,10 @@ SConscript(['selfdrive/locationd/SConscript'])
 SConscript(['selfdrive/navd/SConscript'])
 SConscript(['selfdrive/modeld/SConscript'])
 SConscript(['selfdrive/ui/SConscript'])
+
+#Ajarpilot
 SConscript(['ajarpilot/selector/SConscript'])
+SConscript(['ajarpilot/camerad/SConscript'])
 
 if arch in ['x86_64', 'aarch64', 'Darwin'] and Dir('#tools/cabana/').exists() and GetOption('extras'):
   SConscript(['tools/replay/SConscript'])
