@@ -190,6 +190,8 @@ env = Environment(
 
   CPPPATH=cpppath + [
     "#",
+    "#ajarpilot/selector/include",
+    "#ajarpilot/ui/include",
     "#third_party/acados/include",
     "#third_party/acados/include/blasfeo/include",
     "#third_party/acados/include/hpipm/include",
@@ -376,10 +378,14 @@ if arch != "Darwin":
 if arch == "larch64":
   SConscript(['system/camerad/SConscript'])
 
+SConscript(['ajarpilot/selector/SConscript'])
+SConscript(['ajarpilot/ui/SConscript'])
+
 # Build openpilot
 SConscript(['third_party/SConscript'])
 
 SConscript(['selfdrive/SConscript'])
+
 
 if Dir('#tools/cabana/').exists() and GetOption('extras'):
   SConscript(['tools/replay/SConscript'])
