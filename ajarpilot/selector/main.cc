@@ -2,7 +2,6 @@
 
 #include <QApplication>
 #include <QScreen>
-#include <MainWindow.h>
 
 #ifdef QCOM2
 #include <qpa/qplatformnativeinterface.h>
@@ -10,6 +9,7 @@
 #include <QPlatformSurfaceEvent>
 #endif
 
+#include "ajarpilot/selector/main_window.h"
 #include "system/hardware/hw.h"
 
 const QSize DEVICE_SCREEN_SIZE = {2160, 1080};
@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
         w.setMaximumSize(DEVICE_SCREEN_SIZE);
         w.resize(size);
     }
-    else 
+    else
         w.setFixedSize(DEVICE_SCREEN_SIZE);
 
     w.show();

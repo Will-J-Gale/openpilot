@@ -1,0 +1,2 @@
+constexpr const char* AJARPILOT_LAUNCH = "/bin/bash -c '/usr/bin/tmux new-session -s ajarpilot -d /data/openpilot/ajarpilot/ui/ui'";
+constexpr const char* OPENPILOT_LAUNCH = "/bin/bash -c '/usr/bin/tmux new-session -s comma -d /data/openpilot/launch_openpilot.sh'";

@@ -378,14 +378,12 @@ if arch != "Darwin":
 if arch == "larch64":
   SConscript(['system/camerad/SConscript'])
 
-SConscript(['ajarpilot/selector/SConscript'])
-SConscript(['ajarpilot/ui/SConscript'])
 
 # Build openpilot
 SConscript(['third_party/SConscript'])
 
 SConscript(['selfdrive/SConscript'])
-
+SConscript(['ajarpilot/SConscript'])
 
 if Dir('#tools/cabana/').exists() and GetOption('extras'):
   SConscript(['tools/replay/SConscript'])

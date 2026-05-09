@@ -2,8 +2,8 @@
 #include <iostream>
 #include <string>
 
-#include <MainWindow.h>
-#include <Constants.h>
+#include "ajarpilot/selector/main_window.h"
+#include "ajarpilot/selector/constants.h"
 
 MainWindow::MainWindow(QWidget* parent) : QWidget(parent)
 {
@@ -18,11 +18,11 @@ MainWindow::MainWindow(QWidget* parent) : QWidget(parent)
 
     openpilotButton = new QPushButton(this);
     openpilotButton->setObjectName(QString::fromUtf8("openpilot"));
-    
+
     std::string openpilot_text = "openpilot\n(" + std::to_string(timeRemaining) + ")";
     openpilotButton->setText(QString::fromUtf8(openpilot_text.c_str()));
     QObject::connect(openpilotButton, &QPushButton::clicked, [this]() { this->runOpenpilot(); });
-    
+
     QSizePolicy sPolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
     sPolicy.setHorizontalStretch(0);
     sPolicy.setVerticalStretch(0);
@@ -59,8 +59,7 @@ MainWindow::MainWindow(QWidget* parent) : QWidget(parent)
 
 void MainWindow::runAjarpilot()
 {
-    // std::system(AJARPILOT_LAUNCH);
-    std::cout << AJARPILOT_LAUNCH;
+    std::system(AJARPILOT_LAUNCH);
     QCoreApplication::quit();
 }
 

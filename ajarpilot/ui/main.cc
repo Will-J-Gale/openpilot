@@ -1,47 +1,34 @@
-#include <iostream>
-
 #include <QApplication>
-#include <QScreen>
-#include "ajarpilot/ui/include/MainWindow.h"
+#include <QtWidgets>
 
-#ifdef QCOM2
-#include <qpa/qplatformnativeinterface.h>
-#include <wayland-client-protocol.h>
-#include <QPlatformSurfaceEvent>
-#endif
+#include "selfdrive/ui/qt/qt_window.h"
+#include "selfdrive/ui/qt/util.h"
+#include "selfdrive/ui/qt/widgets/cameraview.h"
 
-#include "system/hardware/hw.h"
+int main(int argc, char *argv[]) {
+  initApp(argc, argv);
 
-const QSize DEVICE_SCREEN_SIZE = {2160, 1080};
+  QApplication a(argc, argv);
+  QWidget w;
+  setMainWindow(&w);
 
-int main(int argc, char *argv[])
-{
-    QApplication a(argc, argv);
-    const QSize size = QGuiApplication::primaryScreen()->size();
-    MainWindow w;
+  QVBoxLayout *layout = new QVBoxLayout(&w);
+  layout->setMargin(0);
+  layout->setSpacing(0);
 
-    if (Hardware::PC()) {
-        w.setMinimumSize(QSize(640, 480)); // allow resize smaller than fullscreen
-        w.setMaximumSize(DEVICE_SCREEN_SIZE);
-        w.resize(size);
-    }
-    else 
-        w.setFixedSize(DEVICE_SCREEN_SIZE);
+  {
+    QHBoxLayout *hlayout = new QHBoxLayout();
+    layout->addLayout(hlayout);
+    hlayout->addWidget(new CameraWidget("camerad", VISION_STREAM_ROAD));
+    // hlayout->addWidget(new CameraWidget("camerad", VISION_STREAM_WIDE_ROAD));
+  }
 
-    w.show();
+//   {
+//     QHBoxLayout *hlayout = new QHBoxLayout();
+//     layout->addLayout(hlayout);
+//     hlayout->addWidget(new CameraWidget("camerad", VISION_STREAM_DRIVER));
+//     hlayout->addWidget(new CameraWidget("camerad", VISION_STREAM_WIDE_ROAD));
+//   }
 
-#ifdef QCOM2
-    QPlatformNativeInterface *native = QGuiApplication::platformNativeInterface();
-    wl_surface *s = reinterpret_cast<wl_surface*>(native->nativeResourceForWindow("surface", w.windowHandle()));
-    wl_surface_set_buffer_transform(s, WL_OUTPUT_TRANSFORM_270);
-    wl_surface_commit(s);
-    w.showFullScreen();
-
-    // ensure we have a valid eglDisplay, otherwise the ui will silently fail
-    void *egl = native->nativeResourceForWindow("egldisplay", w.windowHandle());
-    std::cout << "Created egl" << std::endl;
-    assert(egl != nullptr);
-#endif
-
-    return a.exec();
+  return a.exec();
 }

@@ -1,24 +1,17 @@
-Import('qt_env', 'arch', 'common', 'messaging', 'visionipc',
-       'cereal', 'transformations')
+import os
+import json
+Import('qt_env', 'arch', 'common', 'messaging', 'visionipc', 'transformations', 'widgets', 'qt_util')
 
-base_libs = [common, messaging, cereal, visionipc, transformations, 'zmq',
-             'capnp', 'kj', 'm', 'OpenCL', 'ssl', 'crypto', 'pthread'] + qt_env["LIBS"]
+base_libs = [common, messaging, visionipc, transformations, 'm', 'zmq', 'OpenCL', 'ssl', 'crypto', 'pthread'] + qt_env["LIBS"]
 
 if arch == 'larch64':
   base_libs.append('EGL')
-
-maps = arch in ['larch64', 'aarch64', 'x86_64']
-
-if maps and arch != 'larch64':
-  rpath = [Dir(f"#third_party/mapbox-gl-native-qt/{arch}").srcnode().abspath]
-  qt_env["RPATH"] += rpath
 
 if arch == "Darwin":
   del base_libs[base_libs.index('OpenCL')]
   qt_env['FRAMEWORKS'] += ['OpenCL']
 
-qt_env['CPPDEFINES'] = []
-
-# build ui
+# build ajarpilot_ui
+ajarpilot_ui_libs = [widgets, qt_util, messaging, visionipc] + base_libs
 ui_src = Glob("#ajarpilot/ui/*.cc") + Glob("#ajarpilot/ui/**/*.cc")
-qt_env.Program("#ajarpilot/ui/ui", ui_src, LIBS=base_libs)
+qt_env.Program("ui", ui_src, LIBS=ajarpilot_ui_libs)

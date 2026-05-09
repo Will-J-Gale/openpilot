@@ -23,7 +23,7 @@ widgets_src = ["qt/widgets/input.cc", "qt/widgets/wifi.cc", "qt/prime_state.cc",
                "qt/request_repeater.cc", "qt/qt_window.cc", "qt/network/networking.cc", "qt/network/wifi_manager.cc"]
 
 widgets = qt_env.Library("qt_widgets", widgets_src, LIBS=base_libs)
-Export('widgets')
+Export('widgets', 'qt_util')
 qt_libs = [widgets, qt_util] + base_libs
 
 qt_src = ["main.cc", "ui.cc", "qt/sidebar.cc", "qt/body.cc",
@@ -107,5 +107,5 @@ if GetOption('extras'):
       assert f[0].get_size() < 370*1e3
 
 # build watch3
-if arch in ['x86_64', 'aarch64', 'Darwin'] or GetOption('extras'):
-  qt_env.Program("watch3", ["watch3.cc"], LIBS=qt_libs + ['common', 'msgq', 'visionipc'])
+# if arch in ['x86_64', 'aarch64', 'Darwin'] or GetOption('extras'):
+qt_env.Program("watch3", ["watch3.cc"], LIBS=qt_libs + ['common', 'msgq', 'visionipc'])
