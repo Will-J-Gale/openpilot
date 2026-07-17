@@ -1,10 +1,21 @@
+import os
 import time
 from subprocess import Popen
 
+LOG_ROOT = "/data/custom_drives"
+os.environ["LOG_ROOT"] = LOG_ROOT
+os.makedirs(LOG_ROOT, exist_ok=True)
+
 PROCESSES = [
     ("openpilot/system/camerad", "./camerad"),
+    ("openpilot/system/loggerd", "./encoderd"),
+    ("ajarpilot/loggerd", "./loggerd"),
     ("ajarpilot/ui", "./ui"),
 ]
+
+GREEN = "\033[32m"
+RED = "\033[31m"
+RESET = "\033[0m"
 
 def main():
     processes = []
@@ -15,6 +26,14 @@ def main():
 
     while(True):
         try:
+            message = "Processes: "
+            for command, p in processes:
+                alive = p.poll() is None
+                colour = GREEN if alive else RED
+                message += f"{colour}{command}{RESET} "
+
+            print(message)
+
             time.sleep(0.5)
         except KeyboardInterrupt:
             break

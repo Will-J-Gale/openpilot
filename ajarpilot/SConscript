@@ -1,5 +1,6 @@
 SConscript(['emessgee/SConscript'])
 SConscript([
   'selector/SConscript',
-  'ui/SConscript'
+  'ui/SConscript',
+  'loggerd/SConscript'
 ])
