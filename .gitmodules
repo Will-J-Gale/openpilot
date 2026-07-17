@@ -16,3 +16,6 @@
 [submodule "tinygrad"]
   path = tinygrad_repo
   url = https://github.com/commaai/tinygrad.git
+[submodule "ajarpilot/emessgee"]
+	path = ajarpilot/emessgee
+	url = https://github.com/Will-J-Gale/emessgee

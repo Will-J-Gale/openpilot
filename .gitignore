@@ -107,3 +107,4 @@ Pipfile
 #Ajarpilot
 ajarpilot/selector/selector
 ajarpilot/ui/ui
+ajarpilot/emessgee/emessgee

@@ -1,2 +1,5 @@
-SConscript(['selector/SConscript'])
-SConscript(['ui/SConscript'])
+SConscript(['emessgee/SConscript'])
+SConscript([
+  'selector/SConscript',
+  'ui/SConscript'
+])
