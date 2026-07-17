@@ -103,3 +103,7 @@ Pipfile
 # Ignore all local history of files
 .history
 .ionide
+
+#Ajarpilot
+ajarpilot/selector/selector
+ajarpilot/ui/ui
