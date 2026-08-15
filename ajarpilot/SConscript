@@ -1,4 +1,13 @@
+Import("env")
+
+emessgee_dir = Dir('emessgee')
+
+env = env.Clone()
+env.Append(CPPPATH=[emessgee_dir.abspath])
+Export("env")
+
 SConscript(['emessgee/SConscript'])
+
 SConscript([
   'selector/SConscript',
   'ui/SConscript',
