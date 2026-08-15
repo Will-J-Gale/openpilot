@@ -30,7 +30,8 @@ def main():
             for command, p in processes:
                 alive = p.poll() is None
                 colour = GREEN if alive else RED
-                message += f"{colour}{command}{RESET} "
+                command_text = command.replace("./", "")
+                message += f"{colour}{command_text}{RESET} "
 
             print(message)
 
