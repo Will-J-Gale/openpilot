@@ -381,7 +381,6 @@ if arch == "larch64":
 
 # Build openpilot
 SConscript(['third_party/SConscript'])
-
 SConscript(['selfdrive/SConscript'])
 SConscript(['ajarpilot/SConscript'])
 
