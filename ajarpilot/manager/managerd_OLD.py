@@ -9,8 +9,9 @@ os.makedirs(LOG_ROOT, exist_ok=True)
 PROCESSES = [
     ("openpilot/system/camerad", "./camerad"),
     ("openpilot/system/loggerd", "./encoderd"),
-    ("ajarpilot/loggerd", "./loggerd"),
-    ("ajarpilot/ui", "./ui"),
+
+    # ("ajarpilot/loggerd", "./loggerd"),
+    # ("ajarpilot/ui", "./ui"),
 ]
 
 GREEN = "\033[32m"

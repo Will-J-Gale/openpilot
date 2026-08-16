@@ -333,6 +333,7 @@ def hardware_thread(end_event, hw_queue) -> None:
             pass
 
     # Handle offroad/onroad transition
+    # onroad_conditions["ignition"] = True #@TODO DEBUG TO TEST MODELD
     should_start = all(onroad_conditions.values())
     if started_ts is None:
       should_start = should_start and all(startup_conditions.values())

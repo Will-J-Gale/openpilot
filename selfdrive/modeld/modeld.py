@@ -193,6 +193,7 @@ def main(demo=False):
   meta_extra = FrameMeta()
 
 
+  # demo = True #@TODO DEBUG FOR MODEL TESTING
   if demo:
     CP = get_demo_car_params()
   else:
