@@ -1,10 +1,6 @@
 from smbus2 import SMBus
 
-def decode_bytes(lowByte, highByte):
-    value = (highByte<<8) + lowByte
-    if value >= (256*256)//2:
-        value = value - (256*256)
-    return value
+from ajarpilot.sensors.utils import decode_bytes
 
 I2C_BUS = 1
 LSM6DS3_ADDR = 0x6A
