@@ -1,9 +1,14 @@
 Import("env")
 
 emessgee_dir = Dir('emessgee')
+common_dir = Dir('common')
 
 env = env.Clone()
-env.Append(CPPPATH=[emessgee_dir.abspath])
+env.Append(CPPPATH=[
+  emessgee_dir.abspath,
+  common_dir.abspath
+])
+
 Export("env")
 
 SConscript(['emessgee/SConscript'])
