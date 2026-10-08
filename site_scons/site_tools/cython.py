@@ -12,7 +12,8 @@ np_version = SCons.Script.Value(np.__version__)
 
 def pyx_scan(node, env, path, arg=None):
   contents = node.get_text_contents()
-  env.Depends(str(node).split('.')[0] + env['CYTHONCFILESUFFIX'], np_version)
+  if str(node).endswith('.pyx'):
+    env.Depends(str(node).split('.')[0] + env['CYTHONCFILESUFFIX'], np_version)
 
   # from <module> cimport ...
   matches = pyx_from_import_re.findall(contents)

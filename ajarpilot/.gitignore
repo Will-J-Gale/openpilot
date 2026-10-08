@@ -2,3 +2,6 @@ moc_*
 *.moc
 
 loggerd/loggerd
+modeld/models/*
+
+**/*capnp.*

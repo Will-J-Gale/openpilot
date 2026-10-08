@@ -13,6 +13,11 @@ Export("env")
 
 SConscript(['emessgee/SConscript'])
 
+capnp_files = Glob("messaging/*.capnp")
+env.Command([f'gen/cpp/{s}.c++' for s in capnp_files] + [f'gen/cpp/{s}.h' for s in capnp_files],
+            capnp_files,
+            f"capnpc $SOURCES -o c++")
+
 SConscript([
   'selector/SConscript',
   'ui/SConscript',
