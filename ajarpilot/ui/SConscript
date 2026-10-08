@@ -14,4 +14,5 @@ if arch == "Darwin":
 # build ajarpilot_ui
 ajarpilot_ui_libs = [widgets, qt_util, messaging, visionipc] + base_libs
 ui_src = Glob("#ajarpilot/ui/*.cc") + Glob("#ajarpilot/ui/**/*.cc")
+ui_src = [s for s in ui_src if not s.name.startswith('moc_')]
 qt_env.Program("ui", ui_src, LIBS=ajarpilot_ui_libs)
