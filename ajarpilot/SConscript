@@ -1,20 +1,24 @@
-Import("env")
+Import("env", "qt_env")
 
 emessgee_dir = Dir('emessgee')
 common_dir = Dir('common')
 
-env = env.Clone()
-env.Append(CPPPATH=[
+include_dirs = [
   emessgee_dir.abspath,
   common_dir.abspath
-])
+]
+env = env.Clone()
+env.Append(CPPPATH=include_dirs)
 
-Export("env")
+qt_env = qt_env.Clone()
+qt_env.Append(CPPPATH=include_dirs)
+
+Export("env", "qt_env")
 
 SConscript(['emessgee/SConscript'])
 
 capnp_files = Glob("messaging/*.capnp")
-env.Command([f'gen/cpp/{s}.c++' for s in capnp_files] + [f'gen/cpp/{s}.h' for s in capnp_files],
+env.Command([f'{s}.c++' for s in capnp_files] + [f'{s}.h' for s in capnp_files],
             capnp_files,
             f"capnpc $SOURCES -o c++")
 

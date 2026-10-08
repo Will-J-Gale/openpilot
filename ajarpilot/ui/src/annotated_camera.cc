@@ -6,7 +6,10 @@
 #include <cmath>
 
 #include "common/swaglog.h"
+#include <capnp/serialize-packed.h>
+#include <kj/io.h>
 #include "selfdrive/ui/qt/util.h"
+#include "ajarpilot/messaging/log.capnp.h"
 
 const Eigen::Matrix3f CAM_INTRINSIC_MATRIX = (Eigen::Matrix3f() <<
   2648.0, 0.0, 1928.0 / 2,
@@ -24,6 +27,7 @@ const QColor BG_COLOUR(0x00, 0x00, 0x00, 0x00);
 AnnotatedCameraWidget2::AnnotatedCameraWidget2(VisionStreamType type, QWidget *parent)
     : fps_filter(UI_FREQ, 3, 1. / UI_FREQ), CameraWidget("camerad", type, parent) {
   pm = std::make_unique<PubMaster>(std::vector<const char*>{"uiDebug"});
+  sub = std::make_unique<emessgee::Subscriber>("model_data");
 
   main_layout = new QVBoxLayout(this);
   main_layout->setMargin(UI_BORDER_SIZE);
@@ -151,21 +155,55 @@ void AnnotatedCameraWidget2::paintGL() {
     0.0f, y_scale, 0.0f,
     0.0f, 0.0f, 1.0f).finished();
 
-  for(size_t i = 0; i < 34; i++)
-  {
-    float z = i * 3.0f;
-    Eigen::Vector3f world_point(0, 0.5, z);
-    auto pt = video_transform * (CAM_INTRINSIC_MATRIX * world_point); // (world -> homog) -> aspect shift for screen size
-    QPointF image_point(pt.x() / pt.z(), pt.y() / pt.z());
 
-    if(std::isinf(image_point.x()) or std::isnan(image_point.x()) or std::isinf(image_point.y()) or std::isnan(image_point.y()))
+  emessgee::ReadResult result = sub->recv("model_data");
+
+  if(result.valid)
+  {
+    kj::ArrayInputStream input_stream(kj::arrayPtr(result.data, result.size));
+    capnp::PackedMessageReader reader(input_stream);
+    ModelData::Reader model_data = reader.getRoot<ModelData>();
+
+    QPolygonF polygon;
+
+    for(size_t i = 0; i < model_data.getPath().size(); i++)
     {
-      continue;
+      Eigen::Vector3f world_point(
+        model_data.getPath()[i].getX(),
+        model_data.getPath()[i].getY() + 1.0,
+        model_data.getPath()[i].getZ()
+      );
+
+      auto pt = video_transform * (CAM_INTRINSIC_MATRIX * world_point); // (world -> homog) -> aspect shift for screen size
+      QPointF image_point(pt.x() / pt.z(), pt.y() / pt.z());
+
+      if(std::isinf(image_point.x()) or std::isnan(image_point.x()) or std::isinf(image_point.y()) or std::isnan(image_point.y()))
+      {
+        continue;
+      }
+
+      polygon << image_point;
     }
 
-
-    painter.drawEllipse(image_point, 3, 3);
+    painter.setPen(QPen(Qt::red, 2));
+    painter.drawPolyline(polygon);
   }
+
+  // for(size_t i = 0; i < 34; i++)
+  // {
+  //   float z = i * 3.0f;
+  //   Eigen::Vector3f world_point(0, 0.5, z);
+  //   auto pt = video_transform * (CAM_INTRINSIC_MATRIX * world_point); // (world -> homog) -> aspect shift for screen size
+  //   QPointF image_point(pt.x() / pt.z(), pt.y() / pt.z());
+
+  //   if(std::isinf(image_point.x()) or std::isnan(image_point.x()) or std::isinf(image_point.y()) or std::isnan(image_point.y()))
+  //   {
+  //     continue;
+  //   }
+
+
+  //   painter.drawEllipse(image_point, 3, 3);
+  // }
   painter.restore();
 
   double cur_draw_t = millis_since_boot();

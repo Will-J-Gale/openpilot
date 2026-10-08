@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import time
 from pathlib import Path
 
@@ -92,7 +94,12 @@ class TinygradModel:
 def main():
     cl_context = CLContext()
     vipc_client = VisionIpcClient("camerad", VisionStreamType.VISION_STREAM_ROAD, True, cl_context)
-    transform = np.eye(3, dtype=np.float32)
+    transform = np.array([
+        [2.0,   0.0, 452.0],
+        [0.0,   2.0, 348.0],
+        [0.0,   0.0,   1.0]
+    ], dtype=np.float32)
+
     pub = Publisher(["model_data"], 1e4, 10)
 
     if(TICI):
@@ -104,14 +111,17 @@ def main():
         time.sleep(0.1)
 
     while(True):
-        buf = vipc_client.recv()
+        try:
+          buf = vipc_client.recv()
 
-        if(buf is None):
-            continue
+          if(buf is None):
+              continue
 
-        prediction = model.run(buf, transform)[0].flatten()
-        model_data = parse_model_output(prediction, PATH_MEANSTD, LEAD_CAR_MEANSTD)
-        pub.send("model_data", model_data.to_bytes_packed())
+          prediction = model.run(buf, transform)[0].flatten()
+          model_data = parse_model_output(prediction, PATH_MEANSTD, LEAD_CAR_MEANSTD)
+          pub.send("model_data", model_data.to_bytes_packed())
+        except KeyboardInterrupt:
+            break
 
 if __name__ == "__main__":
     main()

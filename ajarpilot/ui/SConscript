@@ -1,8 +1,7 @@
-import os
-import json
-Import('qt_env', 'arch', 'common', 'messaging', 'visionipc', 'transformations', 'widgets', 'qt_util')
+Import('qt_env', 'arch', 'common', 'messaging', 'visionipc', 'transformations', 'widgets', 'qt_util',
+       'emessgee')
 
-base_libs = [common, messaging, visionipc, transformations, 'm', 'zmq', 'OpenCL', 'ssl', 'crypto', 'pthread'] + qt_env["LIBS"]
+base_libs = [common, messaging, visionipc, transformations, emessgee, 'm', 'zmq', 'OpenCL', 'ssl', 'crypto', 'pthread'] + qt_env["LIBS"]
 
 if arch == 'larch64':
   base_libs.append('EGL')

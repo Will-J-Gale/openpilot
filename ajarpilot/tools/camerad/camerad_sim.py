@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 os.environ["PYOPENCL_CTX"] = "0:0"
 
@@ -7,8 +9,7 @@ import cv2
 from openpilot.tools.sim.lib.camerad import Camerad
 
 parser = ArgumentParser()
-parser.add_argument("video_path")
-parser.add_argument("--loop", action="store_true")
+parser.add_argument("--video_path", default=os.environ["SIM_VIDEO"])
 
 def main(args):
   video = cv2.VideoCapture(args.video_path)
@@ -22,12 +23,9 @@ def main(args):
       valid, road_image = video.read()
 
       if(not valid):
-        if(args.loop):
-          video.release()
-          video = cv2.VideoCapture(args.video_path)
-          continue
-        else:
-          break
+        video.release()
+        video = cv2.VideoCapture(args.video_path)
+        continue
 
       yuv = camerad.rgb_to_yuv(road_image)
       camerad.cam_send_yuv_road(yuv)
