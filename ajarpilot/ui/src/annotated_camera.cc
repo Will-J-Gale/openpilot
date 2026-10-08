@@ -1,0 +1,186 @@
+#include <iostream>
+#include "ajarpilot/ui/src/annotated_camera.h"
+
+#include <QPainter>
+#include <algorithm>
+#include <cmath>
+
+#include "common/swaglog.h"
+#include "selfdrive/ui/qt/util.h"
+
+const Eigen::Matrix3f CAM_INTRINSIC_MATRIX = (Eigen::Matrix3f() <<
+  2648.0, 0.0, 1928.0 / 2,
+  0.0, 2648.0, 1208.0 / 2,
+  0.0, 0.0, 1.0).finished();
+
+// const Eigen::Matrix3f VIEW_FROM_DEVICE = (Eigen::Matrix3f() <<
+//   0.0, 1.0, 0.0,
+//   0.0, 0.0, 1.0,
+//   1.0, 0.0, 0.0).finished();
+
+const QColor BG_COLOUR(0x00, 0x00, 0x00, 0x00);
+
+// Window that shows camera view and variety of info drawn on top
+AnnotatedCameraWidget2::AnnotatedCameraWidget2(VisionStreamType type, QWidget *parent)
+    : fps_filter(UI_FREQ, 3, 1. / UI_FREQ), CameraWidget("camerad", type, parent) {
+  pm = std::make_unique<PubMaster>(std::vector<const char*>{"uiDebug"});
+
+  main_layout = new QVBoxLayout(this);
+  main_layout->setMargin(UI_BORDER_SIZE);
+  main_layout->setSpacing(0);
+}
+
+// void AnnotatedCameraWidget::updateState(const UIState &s) {
+//   // update engageability/experimental mode button
+//   // experimental_btn->updateState(s);
+//   // dmon.updateState(s);
+// }
+
+void AnnotatedCameraWidget2::initializeGL() {
+  CameraWidget::initializeGL();
+  qInfo() << "OpenGL version:" << QString((const char*)glGetString(GL_VERSION));
+  qInfo() << "OpenGL vendor:" << QString((const char*)glGetString(GL_VENDOR));
+  qInfo() << "OpenGL renderer:" << QString((const char*)glGetString(GL_RENDERER));
+  qInfo() << "OpenGL language version:" << QString((const char*)glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+  prev_draw_t = millis_since_boot();
+  setBackgroundColor(BG_COLOUR);
+}
+
+mat4 AnnotatedCameraWidget2::calcFrameMatrix() {
+  return CameraWidget::calcFrameMatrix();
+  // // Project point at "infinity" to compute x and y offsets
+  // // to ensure this ends up in the middle of the screen
+  // // for narrow come and a little lower for wide cam.
+  // // TODO: use proper perspective transform?
+
+  // // Select intrinsic matrix and calibration based on camera type
+  // const auto &intrinsic_matrix = CAM_INTRINSIC_MATRIX;
+  // const auto &calibration = VIEW_FROM_DEVICE;
+
+  //  // Compute the calibration transformation matrix
+  // const auto calib_transform = intrinsic_matrix * calibration;
+
+  // float zoom = 1.1;
+  // Eigen::Vector3f inf(1000., 0., 0.);
+  // auto Kep = calib_transform * inf;
+
+  // int w = width(), h = height();
+  // float center_x = intrinsic_matrix(0, 2);
+  // float center_y = intrinsic_matrix(1, 2);
+
+  // float max_x_offset = center_x * zoom - w / 2 - 5;
+  // float max_y_offset = center_y * zoom - h / 2 - 5;
+  // float x_offset = std::clamp<float>((Kep.x() / Kep.z() - center_x) * zoom, -max_x_offset, max_x_offset);
+  // float y_offset = std::clamp<float>((Kep.y() / Kep.z() - center_y) * zoom, -max_y_offset, max_y_offset);
+
+  // // Apply transformation such that video pixel coordinates match video
+  // // 1) Put (0, 0) in the middle of the video
+  // // 2) Apply same scaling as video
+  // // 3) Put (0, 0) in top left corner of video
+  // // Eigen::Matrix3f video_transform =(Eigen::Matrix3f() <<
+  // //   zoom, 0.0f, (w / 2 - x_offset) - (center_x * zoom),
+  // //   0.0f, zoom, (h / 2 - y_offset) - (center_y * zoom),
+  // //   0.0f, 0.0f, 1.0f).finished();
+
+  // // model.setTransform(video_transform * calib_transform);
+
+  // float zx = zoom * 2 * center_x / w;
+  // float zy = zoom * 2 * center_y / h;
+  // return mat4{{
+  //   zx, 0.0, 0.0, -x_offset / w * 2,
+  //   0.0, zy, 0.0, y_offset / h * 2,
+  //   0.0, 0.0, 1.0, 0.0,
+  //   0.0, 0.0, 0.0, 1.0,
+  // }};
+}
+
+void AnnotatedCameraWidget2::paintGL() {
+  // UIState *s = uiState();
+  // SubMaster &sm = *(s->sm);
+  // const double start_draw_t = millis_since_boot();
+
+  // draw camera frame
+  {
+    std::lock_guard lk(frame_lock);
+
+    if (frames.empty()) {
+      if (skip_frame_count > 0) {
+        skip_frame_count--;
+        qDebug() << "skipping frame, not ready";
+        return;
+      }
+    } else {
+      // skip drawing up to this many frames if we're
+      // missing camera frames. this smooths out the
+      // transitions from the narrow and wide cameras
+      skip_frame_count = 5;
+    }
+
+    CameraWidget::setStreamType(VISION_STREAM_ROAD);
+    CameraWidget::setFrameId(0);
+    CameraWidget::paintGL();
+  }
+
+
+
+  QPainter painter(this);
+  painter.setRenderHint(QPainter::Antialiasing);
+  painter.setPen(Qt::NoPen);
+
+  painter.save();
+  painter.setBrush(QColor(255, 0, 0, 100));
+
+  float widget_aspect_ratio = (float)width() / height();
+  float frame_aspect_ratio = 1928.0f / 1208.0f;
+
+  //ZX is scale of screen width to get to the aspect of the video, if you shrink the video by this much it looks normal
+  float zx = std::min(frame_aspect_ratio / widget_aspect_ratio, 1.0f);
+  float zy = std::min(widget_aspect_ratio / frame_aspect_ratio, 1.0f);
+
+  //Could probably be made into a matrix
+  float shown_width = width() * zx;
+  float shown_height = height() * zy;
+  float x_scale = shown_width / 1928;
+  float y_scale = shown_height / 1208;
+  float x_offset = (width() / 2.0) - (shown_width / 2.0f);
+  // float y_offset = 0.0f;
+
+  Eigen::Matrix3f video_transform =(Eigen::Matrix3f() <<
+    x_scale, 0.0f, x_offset,
+    0.0f, y_scale, 0.0f,
+    0.0f, 0.0f, 1.0f).finished();
+
+  for(size_t i = 0; i < 34; i++)
+  {
+    float z = i * 3.0f;
+    Eigen::Vector3f world_point(0, 0.5, z);
+    auto pt = video_transform * (CAM_INTRINSIC_MATRIX * world_point); // (world -> homog) -> aspect shift for screen size
+    QPointF image_point(pt.x() / pt.z(), pt.y() / pt.z());
+
+    if(std::isinf(image_point.x()) or std::isnan(image_point.x()) or std::isinf(image_point.y()) or std::isnan(image_point.y()))
+    {
+      continue;
+    }
+
+
+    painter.drawEllipse(image_point, 3, 3);
+  }
+  painter.restore();
+
+  double cur_draw_t = millis_since_boot();
+  double dt = cur_draw_t - prev_draw_t;
+  double fps = fps_filter.update(1. / dt * 1000);
+  if (fps < 15) {
+    LOGW("slow frame rate: %.2f fps", fps);
+  }
+  prev_draw_t = cur_draw_t;
+
+}
+
+void AnnotatedCameraWidget2::showEvent(QShowEvent *event) {
+  CameraWidget::showEvent(event);
+
+  // ui_update_params(uiState());
+  prev_draw_t = millis_since_boot();
+}

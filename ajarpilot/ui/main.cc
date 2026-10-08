@@ -4,6 +4,7 @@
 #include "selfdrive/ui/qt/qt_window.h"
 #include "selfdrive/ui/qt/util.h"
 #include "selfdrive/ui/qt/widgets/cameraview.h"
+#include "ajarpilot/ui/src/annotated_camera.h"
 
 int main(int argc, char *argv[]) {
   initApp(argc, argv);
@@ -19,7 +20,8 @@ int main(int argc, char *argv[]) {
   {
     QHBoxLayout *hlayout = new QHBoxLayout();
     layout->addLayout(hlayout);
-    hlayout->addWidget(new CameraWidget("camerad", VISION_STREAM_ROAD));
+    // hlayout->addWidget(new CameraWidget("camerad", VISION_STREAM_ROAD));
+    hlayout->addWidget(new AnnotatedCameraWidget2(VISION_STREAM_ROAD, &w));
     // hlayout->addWidget(new CameraWidget("camerad", VISION_STREAM_WIDE_ROAD));
   }
 
