@@ -1,14 +1,21 @@
 #!/usr/bin/env python3
-
+import os
 import time
+import pickle
 from pathlib import Path
 
 import numpy as np
+from openpilot.system.hardware import TICI
+if TICI:
+  from tinygrad.tensor import Tensor
+  from tinygrad.dtype import dtypes
+  from openpilot.selfdrive.modeld.runners.tinygrad_helpers import qcom_tensor_from_opencl_address
+  os.environ['QCOM'] = '1'
+else:
+  from openpilot.selfdrive.modeld.runners.ort_helpers import make_onnx_cpu_runner
 
 from msgq.visionipc import VisionIpcClient, VisionStreamType, VisionBuf
 from openpilot.selfdrive.modeld.models.commonmodel_pyx import DrivingModelFrame, CLContext
-from openpilot.selfdrive.modeld.runners.ort_helpers import make_onnx_cpu_runner
-from openpilot.system.hardware import TICI
 from ajarpilot.messaging import log
 from ajarpilot.emessgee.emessgee import Publisher
 
@@ -81,15 +88,20 @@ class OnnxModel:
     def run(self, buf:VisionBuf, transform: np.ndarray):
         images_cl = self.frames.prepare(buf, transform.flatten())
         model_inputs = self.frames.buffer_from_cl(images_cl).reshape(INPUT_SHAPE).astype(dtype=np.uint8)
-        return self.model.run(None, {"input_img": model_inputs})
+        return self.model.run(None, {"input_img": model_inputs})[0].flatten()
 
 #@TODO Figure this out on comma
 class TinygradModel:
-    def __init__(self, model_path):
-        pass
+    def __init__(self, model_path:str, cl_context:CLContext):
+        with open(model_path, "rb") as f:
+          self.model_run = pickle.load(f)
+
+        self.frames = DrivingModelFrame(cl_context)
 
     def run(self, buf:VisionBuf, transform: np.ndarray):
-        pass
+        images_cl = self.frames.prepare(buf, transform.flatten())
+        tensor_input = qcom_tensor_from_opencl_address(images_cl.mem_address, INPUT_SHAPE, dtype=dtypes.uint8)
+        return self.model_run(input_img=tensor_input).numpy().flatten()
 
 def main():
     cl_context = CLContext()
@@ -103,7 +115,7 @@ def main():
     pub = Publisher(["model_data"], 1e4, 10)
 
     if(TICI):
-        model = TinygradModel(MODEL_PKL_PATH)
+        model = TinygradModel(MODEL_PKL_PATH, cl_context)
     else:
         model = OnnxModel(MODEL_PATH, cl_context)
 
@@ -117,7 +129,7 @@ def main():
           if(buf is None):
               continue
 
-          prediction = model.run(buf, transform)[0].flatten()
+          prediction = model.run(buf, transform)
           model_data = parse_model_output(prediction, PATH_MEANSTD, LEAD_CAR_MEANSTD)
           pub.send("model_data", model_data.to_bytes_packed())
         except KeyboardInterrupt:
