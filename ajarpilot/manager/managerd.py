@@ -4,6 +4,7 @@ import os
 import time
 from subprocess import Popen
 
+BASE_DIR = "/data/openpilot"
 LOG_ROOT = "/data/custom_drives"
 os.environ["LOG_ROOT"] = LOG_ROOT
 os.makedirs(LOG_ROOT, exist_ok=True)
@@ -24,7 +25,7 @@ def main():
     processes = []
 
     for cwd, command in PROCESSES:
-        p = Popen([command], cwd=cwd)
+        p = Popen([command], cwd=os.path.join(BASE_DIR, cwd))
         processes.append((command, p))
 
     while(True):
