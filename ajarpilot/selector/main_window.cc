@@ -1,9 +1,10 @@
 #include <cstdlib>
 #include <iostream>
 #include <string>
+#include <iostream>
+#include <fstream>
 
 #include "ajarpilot/selector/main_window.h"
-#include "ajarpilot/selector/constants.h"
 
 MainWindow::MainWindow(QWidget* parent) : QWidget(parent)
 {
@@ -59,13 +60,13 @@ MainWindow::MainWindow(QWidget* parent) : QWidget(parent)
 
 void MainWindow::runAjarpilot()
 {
-    std::system(AJARPILOT_LAUNCH);
+    set_launch_program("ajarpilot");
     QCoreApplication::quit();
 }
 
 void MainWindow::runOpenpilot()
 {
-    std::system(OPENPILOT_LAUNCH);
+    set_launch_program("openpilot");
     QCoreApplication::quit();
 }
 
@@ -80,4 +81,13 @@ void MainWindow::decrementTimer()
     openpilotButton->setText(QString::fromUtf8(openpilot_text.c_str()));
 
     update();
+}
+
+
+void MainWindow::set_launch_program(const char* program)
+{
+  std::ofstream launch_file;
+  launch_file.open("/data/.launch_program");
+  launch_file << program;
+  launch_file.close();
 }

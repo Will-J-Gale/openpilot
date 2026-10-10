@@ -22,4 +22,5 @@ private:
     void runAjarpilot();
     void runOpenpilot();
     void decrementTimer();
+    void set_launch_program(const char* program);
 };
