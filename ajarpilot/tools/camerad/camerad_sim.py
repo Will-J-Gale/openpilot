@@ -2,7 +2,7 @@
 
 import os
 os.environ["PYOPENCL_CTX"] = "0:0"
-
+import time
 from argparse import ArgumentParser
 
 import cv2
@@ -10,6 +10,7 @@ from openpilot.tools.sim.lib.camerad import Camerad
 
 parser = ArgumentParser()
 parser.add_argument("--video_path", default=os.environ["SIM_VIDEO"])
+parser.add_argument("--fps", default=20)
 
 def main(args):
   video = cv2.VideoCapture(args.video_path)
@@ -29,6 +30,7 @@ def main(args):
 
       yuv = camerad.rgb_to_yuv(road_image)
       camerad.cam_send_yuv_road(yuv)
+      time.sleep(1.0/args.fps)
 
   except KeyboardInterrupt:
     pass
