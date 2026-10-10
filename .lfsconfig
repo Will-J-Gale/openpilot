@@ -1,2 +1,2 @@
 [lfs]
-    url = ssh://git@github.com/Will-J-Gale/openpilot.git
+    url = https://github.com/Will-J-Gale/openpilot.git/info/lfs
