@@ -3,6 +3,7 @@ import os
 import time
 import pickle
 from pathlib import Path
+from signal import signal, SIGTERM, SIGINT, SIGKILL
 
 import numpy as np
 from openpilot.system.hardware import TICI
@@ -114,6 +115,15 @@ def main():
 
     pub = Publisher(["model_data"], 1e4, 10)
 
+    running = True
+    def terminate(*args, **kwargs):
+      nonlocal running
+      running = False
+
+    signal(SIGTERM, terminate)
+    signal(SIGINT, terminate)
+    signal(SIGINT, terminate)
+
     if(TICI):
         model = TinygradModel(MODEL_PKL_PATH, cl_context)
     else:
@@ -122,7 +132,7 @@ def main():
     while not vipc_client.connect(False):
         time.sleep(0.1)
 
-    while(True):
+    while(running):
         try:
           buf = vipc_client.recv()
 
@@ -133,7 +143,10 @@ def main():
           model_data = parse_model_output(prediction, PATH_MEANSTD, LEAD_CAR_MEANSTD)
           pub.send("model_data", model_data.to_bytes_packed())
         except KeyboardInterrupt:
+            print("Modeld Keyboard interrupted")
             break
+
+    print("Could close pub here!")
 
 if __name__ == "__main__":
     main()
