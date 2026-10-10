@@ -1,4 +1,4 @@
-Import("env", "qt_env")
+Import("env", "qt_env", "arch")
 
 emessgee_dir = Dir('emessgee')
 common_dir = Dir('common')
@@ -15,12 +15,26 @@ qt_env.Append(CPPPATH=include_dirs)
 
 Export("env", "qt_env")
 
+#Emessgeee
 SConscript(['emessgee/SConscript'])
 
+#Capnp compilation
 capnp_files = Glob("messaging/*.capnp")
 env.Command([f'{s}.c++' for s in capnp_files] + [f'{s}.h' for s in capnp_files],
             capnp_files,
             f"capnpc $SOURCES -o c++")
+
+#Model compilation
+pythonpath_string = 'PYTHONPATH="${PYTHONPATH}:' + env.Dir("#tinygrad_repo").abspath + '"'
+
+if arch == 'larch64':
+  device_string = 'QCOM=1'
+else:
+  device_string = 'CLANG=1 IMAGE=0'
+
+fn = File("modeld/models/entnet").abspath
+cmd = f'{pythonpath_string} {device_string} python3 {Dir("#ajarpilot").abspath}/modeld/models/compile3.py {fn}.onnx {fn}_tinygrad.pkl'
+env.Command(fn + "_tinygrad.pkl", [fn + ".onnx"], cmd)
 
 SConscript([
   'selector/SConscript',
