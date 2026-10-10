@@ -10,6 +10,7 @@ PROCESSES = [
     ("openpilot/system/camerad", "./camerad"),
     ("openpilot/system/loggerd", "./encoderd"),
     ("ajarpilot/loggerd", "./loggerd"),
+    ("ajarpilot/modeld", "./modeld"),
     ("ajarpilot/ui", "./ui"),
 ]
 
