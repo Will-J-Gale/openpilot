@@ -3,8 +3,8 @@
 #include <QVBoxLayout>
 #include <memory>
 #include "selfdrive/ui/qt/widgets/cameraview.h"
+#include "ajarpilot/ui/src/model_renderer.h"
 #include "emessgee/emessgee.h"
-
 
 class AnnotatedCameraWidget2 : public CameraWidget {
   Q_OBJECT
@@ -26,8 +26,7 @@ protected:
   void initializeGL() override;
   void showEvent(QShowEvent *event) override;
   mat4 calcFrameMatrix() override;
-
-  std::unique_ptr<emessgee::Subscriber> sub;
+  ModelRenderer model_renderer;
 
   double prev_draw_t = 1;
   FirstOrderFilter fps_filter;
